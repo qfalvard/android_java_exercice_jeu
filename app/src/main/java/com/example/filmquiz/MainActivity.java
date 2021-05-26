@@ -1,14 +1,17 @@
 package com.example.filmquiz;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
-import android.view.Gravity;
+import android.os.PersistableBundle;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,6 +22,12 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String TAG = "QuizActivity";
+    private static final String KEY_SCORE = "score";
+    private static final String INDEX_QUESTION = "questionEnCours";
+    private static final String BTN_AGAIN_VISIBILITY = "againVisibility";
+    public static final String KEY_QUESTION = "question";
+
     private Button btntrue;
     private Button btnfalse;
     private TextView tvquestion;
@@ -27,11 +36,14 @@ public class MainActivity extends AppCompatActivity {
     private int score = 0;
     private int index = 0;
     private List<Question> questionList = new ArrayList<>();
+    private Context context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Log.d(TAG, "OnCreate() called");
 
         // On récupère les éléments de la vue
         btntrue = findViewById(R.id.btntrue);
@@ -39,6 +51,9 @@ public class MainActivity extends AppCompatActivity {
         tvquestion = findViewById(R.id.tvquestion);
         tvscore = findViewById(R.id.tvscore);
         btnagain = findViewById(R.id.btnagain);
+
+        // On créait le context
+        context = getApplicationContext();
 
         Question question1 = new Question(getString(R.string.question_ai), true);
         Question question2 = new Question(getString(R.string.question_taxi_driver), false);
@@ -52,6 +67,13 @@ public class MainActivity extends AppCompatActivity {
         questionList.add(question4);
         questionList.add(question5);
 
+        // Récupération de la question en cours du Bundle
+        if(savedInstanceState != null){
+            index = savedInstanceState.getInt(INDEX_QUESTION);
+            score = savedInstanceState.getInt(KEY_SCORE );
+            btnagain.setVisibility(savedInstanceState.getInt(BTN_AGAIN_VISIBILITY));
+        }
+
         //On affiche la première question
         tvquestion.setText(questionList.get(index).getText());
         tvscore.setText(String.format("Score : %d points", score));
@@ -60,7 +82,6 @@ public class MainActivity extends AppCompatActivity {
         btntrue.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Context context = getApplicationContext();
                 CharSequence text = "";
                 // Méthode pour vérifier la réponse
                 checkQuestion(true);
@@ -73,7 +94,6 @@ public class MainActivity extends AppCompatActivity {
         btnfalse.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Context context = getApplicationContext();
                 CharSequence text = "";
                 // Méthode pour vérifier la réponse
                 checkQuestion(false);
@@ -97,6 +117,81 @@ public class MainActivity extends AppCompatActivity {
                 btnagain.setVisibility(View.INVISIBLE);
             }
         });
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        Log.d(TAG, "onSaveInstanceState");
+        outState.putInt(INDEX_QUESTION, index);
+        outState.putInt(KEY_SCORE, score);
+        outState.putInt(BTN_AGAIN_VISIBILITY, btnagain.getVisibility());
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // On créait le menu
+        getMenuInflater().inflate(R.menu.menu_main,menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        // effectue une action suivant l'item sélectionné
+        // on test avec un switch l'id de l'item
+        switch (item.getItemId()){
+            case R.id.cheat:
+                // Créer un Intent pour ensuite lancer CheatActivity
+                Intent intent = new Intent(context, CheatActivity.class);
+
+                //on ajouter des données dans le intent pour y accéder dans la nouvelle activity
+                intent.putExtra(KEY_QUESTION, questionList.get(index));
+                startActivity(intent);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.d(TAG, "OnStart() called");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG, "OnResume() called");
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d(TAG, "OnPause() called");
+
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d(TAG, "OnPause() called");
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        Log.d(TAG, "OnRestart() called");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "OnDestroy() called");
+
     }
 
     // En cas de succès

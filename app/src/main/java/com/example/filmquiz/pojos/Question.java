@@ -1,6 +1,8 @@
 package com.example.filmquiz.pojos;
 
-public class Question {
+import java.io.Serializable;
+
+public class Question implements Serializable {
 
     private int id;
     private String text;
